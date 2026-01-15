@@ -51,11 +51,6 @@
 
         .question-container {
             margin-bottom: 35px;
-            opacity: 0;
-            animation: fadeIn 0.5s ease-in forwards;
-        }
-
-        .question-container.active {
             opacity: 1;
         }
 
@@ -175,31 +170,7 @@
             margin-top: 20px;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(139, 0, 0, 0.2);
-            border-radius: 3px;
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #8b0000, #ff4444);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .count-instruction {
-            text-align: center;
-            margin-top: 30px;
-            padding: 15px;
-            background: rgba(139, 0, 0, 0.1);
-            border-radius: 10px;
-            color: #d0d0d0;
-            font-size: 1.05em;
-        }
 
         @media (max-width: 600px) {
             .container {
@@ -225,16 +196,12 @@
     <div class="container">
         <h1>Which Black Horror Character Are You?</h1>
         <div class="description">
-            Answer honestly… don't overthink 😭 Based on Get Out & Us.<br>
-            👉 Count which letter you pick the most at the end to get your result.
-        </div>
-
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress"></div>
+            Answer honestly… don't overthink. Based on Get Out & Us.<br>
+            Answer all questions, then click Get Results to see which character you are.
         </div>
 
         <div id="quiz-container">
-            <div class="question-container active" data-question="0">
+            <div class="question-container" data-question="0">
                 <div class="question">You hear a strange noise downstairs at night. What do you do?</div>
                 <div class="options">
                     <div class="option" data-value="A">
@@ -324,112 +291,132 @@
                 </div>
             </div>
 
-            <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
-            <button class="btn" id="submit-btn" onclick="showResults()" style="display: none;">See Results</button>
+            <button class="btn" id="submit-btn" onclick="showResults()" disabled>Get Results</button>
+            <div id="error-message" style="display: none; color: #ff6666; text-align: center; margin-top: 15px; font-weight: 600;"></div>
         </div>
 
         <div class="results" id="results">
             <div class="result-title">Your Result</div>
-            <div class="count-instruction">
-                Count which letter (A, B, C, or D) you chose the most 👇
-            </div>
-            <div class="result-description" id="result-content">
-                <div style="margin-bottom: 20px;">
-                    <strong style="color: #ff6666;">Mostly A → Chris (Get Out)</strong><br>
-                    You trust your instincts, notice patterns early, and survive because you pay attention. Quietly smart. Never ignores vibes.
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <strong style="color: #ff6666;">Mostly B → Adelaide (Us)</strong><br>
-                    Protective, intense, and built for survival. You lead when things get scary and do what needs to be done for your people.
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <strong style="color: #ff6666;">Mostly C → Gabe (Us)</strong><br>
-                    You joke through the fear, but don't get it twisted — when it's time to step up, you DO. Loyal, real, and human.
-                </div>
-                <div>
-                    <strong style="color: #ff6666;">Mostly D → Red (Us)</strong><br>
-                    Quiet power. Deep thinker. Intimidating without trying. You've been through things — and it shows.
-                </div>
+            <div id="result-content">
+                <div class="result-character">Calculating your result...</div>
             </div>
         </div>
     </div>
 
     <script>
-        let currentQuestion = 0;
         const totalQuestions = 5;
         const answers = [];
 
-        function updateProgress() {
-            const progress = ((currentQuestion + 1) / totalQuestions) * 100;
-            document.getElementById('progress').style.width = progress + '%';
+        function checkAllAnswered() {
+            let allAnswered = true;
+            for (let i = 0; i < totalQuestions; i++) {
+                if (!answers[i]) {
+                    allAnswered = false;
+                    break;
+                }
+            }
+            const submitBtn = document.getElementById('submit-btn');
+            const errorMsg = document.getElementById('error-message');
+            
+            submitBtn.disabled = !allAnswered;
+            
+            // Hide error message when all questions are answered
+            if (allAnswered && errorMsg) {
+                errorMsg.style.display = 'none';
+            }
         }
 
-        function initQuestion() {
+        function initQuiz() {
             const questionContainers = document.querySelectorAll('.question-container');
+            
             questionContainers.forEach((container, index) => {
-                if (index === currentQuestion) {
-                    container.classList.add('active');
-                } else {
-                    container.classList.remove('active');
-                }
-            });
-
-            const options = document.querySelectorAll(`[data-question="${currentQuestion}"] .option`);
-            options.forEach(option => {
-                option.addEventListener('click', function() {
-                    options.forEach(opt => opt.classList.remove('selected'));
-                    this.classList.add('selected');
-                    answers[currentQuestion] = this.getAttribute('data-value');
-                    document.getElementById('next-btn').disabled = false;
+                const options = container.querySelectorAll('.option');
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        // Remove selected from other options in this question
+                        options.forEach(opt => opt.classList.remove('selected'));
+                        // Add selected to clicked option
+                        this.classList.add('selected');
+                        // Save answer
+                        answers[index] = this.getAttribute('data-value');
+                        // Check if all questions are answered
+                        checkAllAnswered();
+                    });
                 });
             });
 
-            updateProgress();
-
-            if (currentQuestion === totalQuestions - 1) {
-                document.getElementById('next-btn').style.display = 'none';
-                document.getElementById('submit-btn').style.display = 'block';
-            } else {
-                document.getElementById('next-btn').style.display = 'block';
-                document.getElementById('submit-btn').style.display = 'none';
-            }
-        }
-
-        function nextQuestion() {
-            if (currentQuestion < totalQuestions - 1) {
-                currentQuestion++;
-                initQuestion();
-                document.getElementById('next-btn').disabled = true;
-            }
+            // Initial check
+            checkAllAnswered();
         }
 
         function showResults() {
-            const counts = { A: 0, B: 0, C: 0, D: 0 };
-            answers.forEach(answer => {
-                if (answer) counts[answer]++;
-            });
-
-            const maxCount = Math.max(...Object.values(counts));
-            const mostSelected = Object.keys(counts).filter(key => counts[key] === maxCount);
-
-            document.getElementById('quiz-container').style.display = 'none';
-            document.getElementById('results').classList.add('show');
-
-            let resultText = '';
-            if (mostSelected.includes('A')) {
-                resultText = '<div class="result-character">Chris (Get Out)</div><div class="result-description">You trust your instincts, notice patterns early, and survive because you pay attention. Quietly smart. Never ignores vibes.</div>';
-            } else if (mostSelected.includes('B')) {
-                resultText = '<div class="result-character">Adelaide (Us)</div><div class="result-description">Protective, intense, and built for survival. You lead when things get scary and do what needs to be done for your people.</div>';
-            } else if (mostSelected.includes('C')) {
-                resultText = '<div class="result-character">Gabe (Us)</div><div class="result-description">You joke through the fear, but don\'t get it twisted — when it\'s time to step up, you DO. Loyal, real, and human.</div>';
-            } else if (mostSelected.includes('D')) {
-                resultText = '<div class="result-character">Red (Us)</div><div class="result-description">Quiet power. Deep thinker. Intimidating without trying. You\'ve been through things — and it shows.</div>';
+            // Validate all questions are answered
+            let allAnswered = true;
+            for (let i = 0; i < totalQuestions; i++) {
+                if (!answers[i]) {
+                    allAnswered = false;
+                    break;
+                }
+            }
+            
+            if (!allAnswered) {
+                const errorMsg = document.getElementById('error-message');
+                if (errorMsg) {
+                    errorMsg.textContent = 'Please answer all questions before getting results.';
+                    errorMsg.style.display = 'block';
+                }
+                return;
             }
 
+            const counts = { A: 0, B: 0, C: 0, D: 0 };
+            
+            // Count all answers
+            for (let i = 0; i < totalQuestions; i++) {
+                if (answers[i]) {
+                    counts[answers[i]]++;
+                }
+            }
+
+            // Find the maximum count
+            const maxCount = Math.max(counts.A, counts.B, counts.C, counts.D);
+            
+            // Determine which character (priority: A, B, C, D if tie)
+            let characterName = '';
+            let description = '';
+            
+            if (counts.A === maxCount) {
+                characterName = 'Chris (Get Out)';
+                description = 'You trust your instincts, notice patterns early, and survive because you pay attention. Quietly smart. Never ignores vibes.';
+            } else if (counts.B === maxCount) {
+                characterName = 'Adelaide (Us)';
+                description = 'Protective, intense, and built for survival. You lead when things get scary and do what needs to be done for your people.';
+            } else if (counts.C === maxCount) {
+                characterName = 'Gabe (Us)';
+                description = 'You joke through the fear, but don\'t get it twisted — when it\'s time to step up, you DO. Loyal, real, and human.';
+            } else if (counts.D === maxCount) {
+                characterName = 'Red (Us)';
+                description = 'Quiet power. Deep thinker. Intimidating without trying. You\'ve been through things — and it shows.';
+            }
+
+            // Hide quiz and show results
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('results').classList.add('show');
+            
+            // Hide error message if shown
+            const errorMsg = document.getElementById('error-message');
+            if (errorMsg) {
+                errorMsg.style.display = 'none';
+            }
+
+            // Display result
+            const resultText = '<div class="result-character">' + characterName + '</div><div class="result-description">' + description + '</div>';
             document.getElementById('result-content').innerHTML = resultText;
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        initQuestion();
+        initQuiz();
     </script>
 </body>
 </html>
