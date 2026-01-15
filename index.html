@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Which Black Horror Character Are You?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b1b 100%);
+            color: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(139, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #ff4444;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .description {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+            color: #d0d0d0;
+            padding: 20px;
+            background: rgba(139, 0, 0, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #8b0000;
+        }
+
+        .question-container {
+            margin-bottom: 35px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+
+        .question-container.active {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #ffcccc;
+            font-weight: 600;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            background: rgba(139, 0, 0, 0.15);
+            border: 2px solid rgba(139, 0, 0, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.05em;
+        }
+
+        .option:hover {
+            background: rgba(139, 0, 0, 0.3);
+            border-color: #8b0000;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: rgba(139, 0, 0, 0.4);
+            border-color: #ff4444;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+        }
+
+        .option-label {
+            font-weight: 600;
+            color: #ff6666;
+            margin-right: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #8b0000, #cc0000);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: block;
+            margin: 30px auto 0;
+            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 0, 0, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+        }
+
+        .results.show {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .result-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ff4444;
+        }
+
+        .result-character {
+            font-size: 1.8em;
+            margin: 20px 0;
+            color: #ffcccc;
+            font-weight: 700;
+        }
+
+        .result-description {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e0e0e0;
+            background: rgba(139, 0, 0, 0.15);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #8b0000;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(139, 0, 0, 0.2);
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b0000, #ff4444);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .count-instruction {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(139, 0, 0, 0.1);
+            border-radius: 10px;
+            color: #d0d0d0;
+            font-size: 1.05em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .question {
+                font-size: 1.1em;
+            }
+
+            .option {
+                font-size: 0.95em;
+                padding: 12px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Which Black Horror Character Are You?</h1>
+        <div class="description">
+            Answer honestly… don't overthink 😭 Based on Get Out & Us.<br>
+            👉 Count which letter you pick the most at the end to get your result.
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+
+        <div id="quiz-container">
+            <div class="question-container active" data-question="0">
+                <div class="question">You hear a strange noise downstairs at night. What do you do?</div>
+                <div class="options">
+                    <div class="option" data-value="A">
+                        <span class="option-label">A.</span> Lock my door and text the group chat
+                    </div>
+                    <div class="option" data-value="B">
+                        <span class="option-label">B.</span> Call out "HELLO??" because I'm brave (or delusional)
+                    </div>
+                    <div class="option" data-value="C">
+                        <span class="option-label">C.</span> Grab something as a weapon first
+                    </div>
+                    <div class="option" data-value="D">
+                        <span class="option-label">D.</span> Ignore it. If it's my time, it's my time.
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container" data-question="1">
+                <div class="question">Your intuition says "something's off." What do you trust most?</div>
+                <div class="options">
+                    <div class="option" data-value="A">
+                        <span class="option-label">A.</span> My gut — it's literally never wrong
+                    </div>
+                    <div class="option" data-value="B">
+                        <span class="option-label">B.</span> Logic — I need proof
+                    </div>
+                    <div class="option" data-value="C">
+                        <span class="option-label">C.</span> Vibes — energy doesn't lie
+                    </div>
+                    <div class="option" data-value="D">
+                        <span class="option-label">D.</span> I ignore it and mind my business
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container" data-question="2">
+                <div class="question">In stressful situations, people usually describe you as…</div>
+                <div class="options">
+                    <div class="option" data-value="A">
+                        <span class="option-label">A.</span> The protector
+                    </div>
+                    <div class="option" data-value="B">
+                        <span class="option-label">B.</span> The planner
+                    </div>
+                    <div class="option" data-value="C">
+                        <span class="option-label">C.</span> The one cracking jokes
+                    </div>
+                    <div class="option" data-value="D">
+                        <span class="option-label">D.</span> The one saying "WE SHOULD'VE LEFT"
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container" data-question="3">
+                <div class="question">Pick the statement that feels TOO real</div>
+                <div class="options">
+                    <div class="option" data-value="A">
+                        <span class="option-label">A.</span> "I noticed the red flags first."
+                    </div>
+                    <div class="option" data-value="B">
+                        <span class="option-label">B.</span> "I stay ready so I don't have to get ready."
+                    </div>
+                    <div class="option" data-value="C">
+                        <span class="option-label">C.</span> "I observe before I act."
+                    </div>
+                    <div class="option" data-value="D">
+                        <span class="option-label">D.</span> "I will survive off instinct alone."
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container" data-question="4">
+                <div class="question">Be honest — in a horror movie, you're most likely to…</div>
+                <div class="options">
+                    <div class="option" data-value="A">
+                        <span class="option-label">A.</span> Figure it out before everyone else
+                    </div>
+                    <div class="option" data-value="B">
+                        <span class="option-label">B.</span> Overthink but still be right
+                    </div>
+                    <div class="option" data-value="C">
+                        <span class="option-label">C.</span> Freeze for a second, then snap into action
+                    </div>
+                    <div class="option" data-value="D">
+                        <span class="option-label">D.</span> Say "nah" and remove yourself immediately
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
+            <button class="btn" id="submit-btn" onclick="showResults()" style="display: none;">See Results</button>
+        </div>
+
+        <div class="results" id="results">
+            <div class="result-title">Your Result</div>
+            <div class="count-instruction">
+                Count which letter (A, B, C, or D) you chose the most 👇
+            </div>
+            <div class="result-description" id="result-content">
+                <div style="margin-bottom: 20px;">
+                    <strong style="color: #ff6666;">Mostly A → Chris (Get Out)</strong><br>
+                    You trust your instincts, notice patterns early, and survive because you pay attention. Quietly smart. Never ignores vibes.
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <strong style="color: #ff6666;">Mostly B → Adelaide (Us)</strong><br>
+                    Protective, intense, and built for survival. You lead when things get scary and do what needs to be done for your people.
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <strong style="color: #ff6666;">Mostly C → Gabe (Us)</strong><br>
+                    You joke through the fear, but don't get it twisted — when it's time to step up, you DO. Loyal, real, and human.
+                </div>
+                <div>
+                    <strong style="color: #ff6666;">Mostly D → Red (Us)</strong><br>
+                    Quiet power. Deep thinker. Intimidating without trying. You've been through things — and it shows.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        const totalQuestions = 5;
+        const answers = [];
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / totalQuestions) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function initQuestion() {
+            const questionContainers = document.querySelectorAll('.question-container');
+            questionContainers.forEach((container, index) => {
+                if (index === currentQuestion) {
+                    container.classList.add('active');
+                } else {
+                    container.classList.remove('active');
+                }
+            });
+
+            const options = document.querySelectorAll(`[data-question="${currentQuestion}"] .option`);
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    answers[currentQuestion] = this.getAttribute('data-value');
+                    document.getElementById('next-btn').disabled = false;
+                });
+            });
+
+            updateProgress();
+
+            if (currentQuestion === totalQuestions - 1) {
+                document.getElementById('next-btn').style.display = 'none';
+                document.getElementById('submit-btn').style.display = 'block';
+            } else {
+                document.getElementById('next-btn').style.display = 'block';
+                document.getElementById('submit-btn').style.display = 'none';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < totalQuestions - 1) {
+                currentQuestion++;
+                initQuestion();
+                document.getElementById('next-btn').disabled = true;
+            }
+        }
+
+        function showResults() {
+            const counts = { A: 0, B: 0, C: 0, D: 0 };
+            answers.forEach(answer => {
+                if (answer) counts[answer]++;
+            });
+
+            const maxCount = Math.max(...Object.values(counts));
+            const mostSelected = Object.keys(counts).filter(key => counts[key] === maxCount);
+
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('results').classList.add('show');
+
+            let resultText = '';
+            if (mostSelected.includes('A')) {
+                resultText = '<div class="result-character">Chris (Get Out)</div><div class="result-description">You trust your instincts, notice patterns early, and survive because you pay attention. Quietly smart. Never ignores vibes.</div>';
+            } else if (mostSelected.includes('B')) {
+                resultText = '<div class="result-character">Adelaide (Us)</div><div class="result-description">Protective, intense, and built for survival. You lead when things get scary and do what needs to be done for your people.</div>';
+            } else if (mostSelected.includes('C')) {
+                resultText = '<div class="result-character">Gabe (Us)</div><div class="result-description">You joke through the fear, but don\'t get it twisted — when it\'s time to step up, you DO. Loyal, real, and human.</div>';
+            } else if (mostSelected.includes('D')) {
+                resultText = '<div class="result-character">Red (Us)</div><div class="result-description">Quiet power. Deep thinker. Intimidating without trying. You\'ve been through things — and it shows.</div>';
+            }
+
+            document.getElementById('result-content').innerHTML = resultText;
+        }
+
+        initQuestion();
+    </script>
+</body>
+</html>
